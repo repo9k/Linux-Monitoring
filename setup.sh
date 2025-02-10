@@ -55,13 +55,9 @@ else
     echo "Node Exporter directory already exists."
 fi
 
-# Step 3: Replace Prometheus configuration if it's missing or incorrect
+# Step 3: Replace Prometheus configuration file (overwrite if necessary)
 echo "Replacing Prometheus configuration file..."
-if [ ! -f /etc/prometheus/prometheus.yml ]; then
-    sudo mv /tmp/prometheus.yml /etc/prometheus/prometheus.yml
-else
-    echo "Prometheus configuration file already exists."
-fi
+sudo mv /tmp/prometheus.yml /etc/prometheus/prometheus.yml
 
 # Step 4: Move service files only if they aren't already present
 echo "Moving Prometheus and Node Exporter service files..."
