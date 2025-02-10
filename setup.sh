@@ -1,57 +1,118 @@
 #!/bin/bash
 
-# Step 1: Download necessary files
-echo "Downloading Prometheus and Node Exporter files..."
-sudo wget -q https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.service -O /tmp/prometheus.service
-sudo wget -q https://github.com/repo9k/Linux-Monitoring/raw/main/node_exporter.service -O /tmp/node_exporter.service
-sudo wget -q https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.yml -O /tmp/prometheus.yml
-sudo wget -q https://github.com/prometheus/prometheus/releases/download/v3.2.0-rc.1/prometheus-3.2.0-rc.1.linux-amd64.tar.gz -O /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz
-sudo wget -q https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz -O /tmp/node_exporter-1.8.2.linux-amd64.tar.gz
+# Step 1: Check if Prometheus and Node Exporter files exist, download if not
+echo "Checking if Prometheus and Node Exporter files are already downloaded..."
+if [ ! -f /tmp/prometheus.service ]; then
+    echo "Downloading prometheus.service..."
+    sudo wget -v https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.service -O /tmp/prometheus.service
+else
+    echo "prometheus.service already exists."
+fi
 
-# Step 2: Extract downloaded tarballs
+if [ ! -f /tmp/node_exporter.service ]; then
+    echo "Downloading node_exporter.service..."
+    sudo wget -v https://github.com/repo9k/Linux-Monitoring/raw/main/node_exporter.service -O /tmp/node_exporter.service
+else
+    echo "node_exporter.service already exists."
+fi
+
+if [ ! -f /tmp/prometheus.yml ]; then
+    echo "Downloading prometheus.yml..."
+    sudo wget -v https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.yml -O /tmp/prometheus.yml
+else
+    echo "prometheus.yml already exists."
+fi
+
+if [ ! -f /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz ]; then
+    echo "Downloading Prometheus tarball..."
+    sudo wget -v https://github.com/prometheus/prometheus/releases/download/v3.2.0-rc.1/prometheus-3.2.0-rc.1.linux-amd64.tar.gz -O /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz
+else
+    echo "Prometheus tarball already exists."
+fi
+
+if [ ! -f /tmp/node_exporter-1.8.2.linux-amd64.tar.gz ]; then
+    echo "Downloading Node Exporter tarball..."
+    sudo wget -v https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz -O /tmp/node_exporter-1.8.2.linux-amd64.tar.gz
+else
+    echo "Node Exporter tarball already exists."
+fi
+
+# Step 2: Extract tarballs only if they haven't been extracted
 echo "Extracting Prometheus and Node Exporter tarballs..."
-tar xzf /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz -C /tmp
-tar xzf /tmp/node_exporter-1.8.2.linux-amd64.tar.gz -C /tmp
+if [ ! -d /etc/prometheus ]; then
+    echo "Extracting Prometheus..."
+    tar xzf /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz -C /tmp
+    sudo mv /tmp/prometheus-3.2.0-rc.1.linux-amd64 /etc/prometheus
+else
+    echo "Prometheus directory already exists."
+fi
 
-# Step 3: Move extracted files to the appropriate directories
-echo "Moving extracted files to /etc/prometheus and /etc/node_exporter..."
-sudo mv /tmp/prometheus-3.2.0-rc.1.linux-amd64 /etc/prometheus
-sudo mv /tmp/node_exporter-1.8.2.linux-amd64 /etc/node_exporter
+if [ ! -d /etc/node_exporter ]; then
+    echo "Extracting Node Exporter..."
+    tar xzf /tmp/node_exporter-1.8.2.linux-amd64.tar.gz -C /tmp
+    sudo mv /tmp/node_exporter-1.8.2.linux-amd64 /etc/node_exporter
+else
+    echo "Node Exporter directory already exists."
+fi
 
-# Step 4: Replace default Prometheus configuration with the downloaded one
+# Step 3: Replace Prometheus configuration if it's missing or incorrect
 echo "Replacing Prometheus configuration file..."
-sudo rm -f /etc/prometheus/prometheus.yml
-sudo mv /tmp/prometheus.yml /etc/prometheus/prometheus.yml
+if [ ! -f /etc/prometheus/prometheus.yml ]; then
+    sudo mv /tmp/prometheus.yml /etc/prometheus/prometheus.yml
+else
+    echo "Prometheus configuration file already exists."
+fi
 
-# Step 5: Move service files to systemd directory
+# Step 4: Move service files only if they aren't already present
 echo "Moving Prometheus and Node Exporter service files..."
-sudo mv /tmp/node_exporter.service /etc/systemd/system/
-sudo mv /tmp/prometheus.service /etc/systemd/system/
+if [ ! -f /etc/systemd/system/node_exporter.service ]; then
+    sudo mv /tmp/node_exporter.service /etc/systemd/system/
+else
+    echo "Node Exporter service file already exists."
+fi
 
-# Step 6: Enable and start the services
+if [ ! -f /etc/systemd/system/prometheus.service ]; then
+    sudo mv /tmp/prometheus.service /etc/systemd/system/
+else
+    echo "Prometheus service file already exists."
+fi
+
+# Step 5: Enable and start the services only if they aren't already running
 echo "Enabling and starting Prometheus and Node Exporter services..."
-sudo systemctl enable node_exporter.service
-sudo systemctl enable prometheus.service
-sudo systemctl restart node_exporter.service
-sudo systemctl restart prometheus.service
+if ! systemctl is-active --quiet node_exporter.service; then
+    sudo systemctl enable node_exporter.service
+    sudo systemctl start node_exporter.service
+else
+    echo "Node Exporter service is already running."
+fi
 
-# Step 7: Install Grafana and its dependencies
-echo "Installing Grafana and dependencies..."
-sudo apt-get update
-sudo apt-get install -y adduser libfontconfig1 musl
+if ! systemctl is-active --quiet prometheus.service; then
+    sudo systemctl enable prometheus.service
+    sudo systemctl start prometheus.service
+else
+    echo "Prometheus service is already running."
+fi
 
-# Step 8: Download and install Grafana
-echo "Downloading and installing Grafana..."
-sudo wget -q https://dl.grafana.com/enterprise/release/grafana-enterprise_11.5.1_amd64.deb -O /tmp/grafana-enterprise_11.5.1_amd64.deb
-sudo dpkg -i /tmp/grafana-enterprise_11.5.1_amd64.deb
+# Step 6: Install Grafana only if it's not installed
+echo "Checking if Grafana is installed..."
+if ! dpkg -l | grep -q grafana; then
+    echo "Installing Grafana..."
+    sudo apt-get update
+    sudo apt-get install -y adduser libfontconfig1 musl
+    sudo wget -v https://dl.grafana.com/enterprise/release/grafana-enterprise_11.5.1_amd64.deb -O /tmp/grafana-enterprise_11.5.1_amd64.deb
+    sudo dpkg -i /tmp/grafana-enterprise_11.5.1_amd64.deb
+else
+    echo "Grafana is already installed."
+fi
 
-# Step 9: Enable and start Grafana server
+# Step 7: Enable and start Grafana server only if it's not already running
 echo "Enabling and starting Grafana server..."
-sudo systemctl enable grafana-server
-sudo systemctl start grafana-server
+if ! systemctl is-active --quiet grafana-server; then
+    sudo systemctl enable grafana-server
+    sudo systemctl start grafana-server
+else
+    echo "Grafana server is already running."
+fi
 
 # Final Step: Confirm services are running
-echo "Verifying service status..."
-sudo systemctl status node_exporter.service
-sudo systemctl status prometheus.service
-sudo systemctl status grafana-server
+echo "Done"
