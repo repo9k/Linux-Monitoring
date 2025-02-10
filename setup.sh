@@ -57,7 +57,7 @@ fi
 
 # Step 3: Replace Prometheus configuration file (overwrite if necessary)
 echo "Replacing Prometheus configuration file..."
-sudo mv /tmp/prometheus.yml /etc/prometheus/prometheus.yml
+sudo mv /tmp/prometheus.yml /etc/prometheus
 
 # Step 4: Move service files only if they aren't already present
 echo "Moving Prometheus and Node Exporter service files..."
