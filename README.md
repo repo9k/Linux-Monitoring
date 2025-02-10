@@ -8,7 +8,7 @@ This repository provides a script to set up a Linux Monitoring system using Prom
 - Root or `sudo` privileges
 - Internet access to download necessary files
 
-## Steps to Install
+## Steps to Install.
 
 ### 1. Clone this Repository
 
