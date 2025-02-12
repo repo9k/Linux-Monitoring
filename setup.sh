@@ -1,151 +1,213 @@
----
-# Monitoring Setup Script
+#!/bin/bash
 
-![Bash](https://img.shields.io/badge/Language-Bash-green)
-![Prometheus](https://img.shields.io/badge/Tools-Prometheus-orange)
-![Grafana](https://img.shields.io/badge/Tools-Grafana-blue)
-![Node Exporter](https://img.shields.io/badge/Tools-Node_Exporter-yellow)
+# Step 1: Check if Prometheus and Node Exporter files exist, download if not
+echo "Checking if Prometheus and Node Exporter files are already downloaded..."
+if [ ! -f /tmp/prometheus.service ]; then
+    echo "Downloading prometheus.service..."
+    sudo wget -v https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.service -O /tmp/prometheus.service
+else
+    echo "prometheus.service already exists."
+fi
+# Function to download a file if it doesn't exist
+download_file() {
+    local url=$1
+    local dest=$2
+    if [ ! -f "$dest" ]; then
+        echo "Downloading $dest..."
+        sudo wget -q "$url" -O "$dest"
+    else
+        echo "$dest already exists."
+    fi
+}
 
-This Bash script automates the setup of a monitoring stack using **Prometheus**, **Node Exporter**, and **Grafana**. It simplifies the process of downloading, configuring, and starting these tools on a Linux system.
+if [ ! -f /tmp/node_exporter.service ]; then
+    echo "Downloading node_exporter.service..."
+    sudo wget -v https://github.com/repo9k/Linux-Monitoring/raw/main/node_exporter.service -O /tmp/node_exporter.service
+else
+    echo "node_exporter.service already exists."
+fi
+# Function to extract a tarball if the destination directory doesn't exist
+extract_tarball() {
+    local tarball=$1
+    local dest_dir=$2
+    if [ ! -d "$dest_dir" ]; then
+        echo "Extracting $tarball..."
+        tar xzf "$tarball" -C /tmp
+        sudo mv "/tmp/$(basename "$tarball" .tar.gz)" "$dest_dir"
+    else
+        echo "$dest_dir already exists."
+    fi
+}
 
----
+if [ ! -f /tmp/prometheus.yml ]; then
+    echo "Downloading prometheus.yml..."
+    sudo wget -v https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.yml -O /tmp/prometheus.yml
+else
+    echo "prometheus.yml already exists."
+fi
+# Function to enable and start a service
+start_service() {
+    local service=$1
+    if ! systemctl is-active --quiet "$service"; then
+        sudo systemctl enable "$service"
+        sudo systemctl start "$service"
+        echo "$service started successfully."
+    else
+        echo "$service is already running."
+    fi
+}
 
-## Features
+if [ ! -f /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz ]; then
+    echo "Downloading Prometheus tarball..."
+    sudo wget -v https://github.com/prometheus/prometheus/releases/download/v3.2.0-rc.1/prometheus-3.2.0-rc.1.linux-amd64.tar.gz -O /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz
+else
+    echo "Prometheus tarball already exists."
+fi
+# Step 1: Setup Monitoring (Download, Extract, and Move Files)
+setup_monitoring() {
+    echo "===== Setting Up Monitoring ====="
+    download_file "https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.service" "/tmp/prometheus.service"
+    download_file "https://github.com/repo9k/Linux-Monitoring/raw/main/node_exporter.service" "/tmp/node_exporter.service"
+    download_file "https://github.com/repo9k/Linux-Monitoring/raw/main/prometheus.yml" "/tmp/prometheus.yml"
+    download_file "https://github.com/prometheus/prometheus/releases/download/v3.2.0-rc.1/prometheus-3.2.0-rc.1.linux-amd64.tar.gz" "/tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz"
+    download_file "https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz" "/tmp/node_exporter-1.8.2.linux-amd64.tar.gz"
 
-- **Automated Setup**: Downloads and configures Prometheus, Node Exporter, and Grafana.
-- **Interactive Menu**: Easy-to-use menu for step-by-step setup.
-- **Error Handling**: Skips steps if files or services already exist.
-- **Service Management**: Automatically starts and enables services.
+if [ ! -f /tmp/node_exporter-1.8.2.linux-amd64.tar.gz ]; then
+    echo "Downloading Node Exporter tarball..."
+    sudo wget -v https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz -O /tmp/node_exporter-1.8.2.linux-amd64.tar.gz
+else
+    echo "Node Exporter tarball already exists."
+fi
+    extract_tarball "/tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz" "/etc/prometheus"
+    extract_tarball "/tmp/node_exporter-1.8.2.linux-amd64.tar.gz" "/etc/node_exporter"
 
----
+# Step 2: Extract tarballs only if they haven't been extracted
+echo "Extracting Prometheus and Node Exporter tarballs..."
+if [ ! -d /etc/prometheus ]; then
+    echo "Extracting Prometheus..."
+    tar xzf /tmp/prometheus-3.2.0-rc.1.linux-amd64.tar.gz -C /tmp
+    sudo mv /tmp/prometheus-3.2.0-rc.1.linux-amd64 /etc/prometheus
+else
+    echo "Prometheus directory already exists."
+fi
+    sudo mv -f /tmp/prometheus.yml /etc/prometheus/
+    sudo mv -f /tmp/node_exporter.service /etc/systemd/system/
+    sudo mv -f /tmp/prometheus.service /etc/systemd/system/
+}
 
-## Tools Included
+if [ ! -d /etc/node_exporter ]; then
+    echo "Extracting Node Exporter..."
+    tar xzf /tmp/node_exporter-1.8.2.linux-amd64.tar.gz -C /tmp
+    sudo mv /tmp/node_exporter-1.8.2.linux-amd64 /etc/node_exporter
+else
+    echo "Node Exporter directory already exists."
+fi
+# Step 2: Start Monitoring Services
+start_services() {
+    echo "===== Starting Monitoring Services ====="
+    start_service "node_exporter.service"
+    start_service "prometheus.service"
+}
 
-1. **Prometheus**: A powerful time-series database for monitoring metrics.
-2. **Node Exporter**: Collects system-level metrics (CPU, memory, disk, etc.).
-3. **Grafana**: A visualization tool for creating dashboards from Prometheus data.
+# Step 3: Replace Prometheus configuration file (overwrite if necessary)
+echo "Replacing Prometheus configuration file..."
+sudo mv /tmp/prometheus.yml /etc/prometheus
+# Step 3: Install Grafana
+install_grafana() {
+    echo "===== Installing Grafana ====="
+    if ! dpkg -l | grep -q grafana; then
+        sudo apt-get update
+        sudo apt-get install -y adduser libfontconfig1 musl
+        download_file "https://dl.grafana.com/enterprise/release/grafana-enterprise_11.5.1_amd64.deb" "/tmp/grafana-enterprise_11.5.1_amd64.deb"
+        sudo dpkg -i /tmp/grafana-enterprise_11.5.1_amd64.deb
+    else
+        echo "Grafana is already installed."
+    fi
+    start_service "grafana-server"
+}
 
----
+# Step 4: Move service files only if they aren't already present
+echo "Moving Prometheus and Node Exporter service files..."
+if [ ! -f /etc/systemd/system/node_exporter.service ]; then
+    sudo mv /tmp/node_exporter.service /etc/systemd/system/
+else
+    echo "Node Exporter service file already exists."
+fi
+# Step 4: Check Service Status
+check_status() {
+    echo "===== Service Status ====="
+    services=("node_exporter.service" "prometheus.service" "grafana-server")
+    for service in "${services[@]}"; do
+        if systemctl is-active --quiet "$service"; then
+            echo "$service is running."
+        else
+            echo "$service is not running."
+        fi
+    done
+}
 
-## Prerequisites
+if [ ! -f /etc/systemd/system/prometheus.service ]; then
+    sudo mv /tmp/prometheus.service /etc/systemd/system/
+else
+    echo "Prometheus service file already exists."
+fi
+# Main menu
+main_menu() {
+    echo "===== Monitoring Setup Menu ====="
+    echo "1. Setup Monitoring (Download, Extract, and Move Files)"
+    echo "2. Start Monitoring Services"
+    echo "3. Install Grafana"
+    echo "4. Check Service Status"
+    echo "5. Exit"
+    read -p "Choose an option (1-5): " choice
 
-- **Linux System**: Tested on Ubuntu/Debian-based systems.
-- **sudo Access**: Required for installing packages and moving files.
-- **Internet Connection**: Needed to download files.
+# Step 5: Enable and start the services only if they aren't already running
+echo "Enabling and starting Prometheus and Node Exporter services..."
+if ! systemctl is-active --quiet node_exporter.service; then
+    sudo systemctl enable node_exporter.service
+    sudo systemctl start node_exporter.service
+else
+    echo "Node Exporter service is already running."
+fi
+    case "$choice" in
+        1) setup_monitoring ;;
+        2) start_services ;;
+        3) install_grafana ;;
+        4) check_status ;;
+        5) exit 0 ;;
+        *) echo "Invalid option. Please try again." ;;
+    esac
+}
 
----
-
-## How to Use
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/monitoring-setup.git
-cd monitoring-setup
-
-### 2. Make the Script Executable
-chmod +x setup_monitoring.sh
-
-### 3. Run the Script
-./setup_monitoring.sh
-
-### 4. Follow the Menu
-
-The script provides an interactive menu with the following options:
-
-| Option | Description                                                                 |
-|--------|-----------------------------------------------------------------------------|
-| 1      | Setup Monitoring (Download, Extract, and Move Files)                       |
-| 2      | Start Monitoring Services (Prometheus and Node Exporter)                    |
-| 3      | Install Grafana                                                             |
-| 4      | Check Service Status                                                        |
-| 5      | Exit                                                                        |
-
----
-
-## Example Workflow
-
-1. Setup Monitoring (Option 1):
-   - Downloads Prometheus, Node Exporter, and Grafana files.
-   - Extracts and moves files to the correct directories.
-
-2. Start Monitoring Services (Option 2):
-   - Starts and enables Prometheus and Node Exporter services.
-
-3. Install Grafana (Option 3):
-   - Installs Grafana and starts the Grafana server.
-
-4. Check Service Status (Option 4):
-   - Verifies that all services are running.
-
----
-
-## Screenshots
-
-### Interactive Menu
-![Menu](https://via.placeholder.com/600x300.png?text=Interactive+Menu)
-
-### Service Status
-![Status](https://via.placeholder.com/600x300.png?text=Service+Status)
-
----
-
-## Contributing
-
-Contributions are welcome! If you have suggestions or improvements, please:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
-
----
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-## Acknowledgments
-
-- [Prometheus](https://prometheus.io/)
-- [Grafana](https://grafana.com/)
-- [Node Exporter](https://github.com/prometheus/node_exporter)
-
----
-
-## Author
-
-[CLAWE] 
-📧 xoo9hr@gmail.com
-
-`
-
----
-
-### Key Features of the README.md:
-1. Badges: Adds badges for Bash, Prometheus, Grafana, and Node Exporter.
-2. Table of Contents: Provides a clear structure for navigation.
-3. Prerequisites: Lists requirements for running the script.
-4.How to Use: Step-by-step instructions for cloning, running, and using the script.
-5. Interactive Menu: Explains each menu option in a table format.
-6. Example Workflow: Guides users through a typical setup process.
-7. Screenshots: Placeholder images for visual appeal (replace with actual screenshots).
-8. Contributing: Encourages contributions with clear steps.
-9. License: Links to the MIT License.
-10. Acknowledgments: Credits the tools used in the script.
-11. Author: Provides your name, GitHub profile, and email.
-
----
-
-### How to Use:
-1. Copy the content above into a file named README.md.
-2. Replace placeholders (e.g., your-username, `YourEmail@example.com`) with your actual details.
-3. Add actual screenshots (if available) by replacing the placeholder image URLs.
-4. Push the README.md to your GitHub repository.
-
----
-
-This README.md is designed to be professional, informative, and visually appealing, making it easy for others to understand and use your script.
+if ! systemctl is-active --quiet prometheus.service; then
+    sudo systemctl enable prometheus.service
+    sudo systemctl start prometheus.service
+else
+    echo "Prometheus service is already running."
+fi
+# Step 6: Install Grafana only if it's not installed
+echo "Checking if Grafana is installed..."
+if ! dpkg -l | grep -q grafana; then
+    echo "Installing Grafana..."
+    sudo apt-get update
+    sudo apt-get install -y adduser libfontconfig1 musl
+    sudo wget -v https://dl.grafana.com/enterprise/release/grafana-enterprise_11.5.1_amd64.deb -O /tmp/grafana-enterprise_11.5.1_amd64.deb
+    sudo dpkg -i /tmp/grafana-enterprise_11.5.1_amd64.deb
+else
+    echo "Grafana is already installed."
+fi
+# Step 7: Enable and start Grafana server only if it's not already running
+echo "Enabling and starting Grafana server..."
+if ! systemctl is-active --quiet grafana-server; then
+    sudo systemctl enable grafana-server
+    sudo systemctl start grafana-server
+else
+    echo "Grafana server is already running."
+fi
+# Final Step: Confirm services are running
+echo "Done"
+# Run the main menu in a loop
+while true; do
+    main_menu
+    read -p "Press Enter to continue..."
+done
