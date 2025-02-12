@@ -70,33 +70,9 @@ The script provides an interactive menu with the following options:
 ### Service Status
 ![Status](https://via.placeholder.com/600x300.png?text=Service+Status)
 
----
-
-## Contributing
-
-Contributions are welcome! If you have suggestions or improvements, please:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Author
 
 [CLAWE] 
 📧 xoo9hr@gmail.com
----
-
-### How to Use:
-1. Copy the content above into a file named README.md.
-2. Replace placeholders (e.g., your-username, `YourEmail@example.com`) with your actual details.
-3. Add actual screenshots (if available) by replacing the placeholder image URLs.
-4. Push the README.md to your GitHub repository.
-
 ---
 This README.md is designed to be professional, informative, and visually appealing, making it easy for others to understand and use your script.
