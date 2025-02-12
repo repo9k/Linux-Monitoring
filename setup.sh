@@ -68,17 +68,20 @@ print_message "Moving Prometheus and Node Exporter service files..." "34"  # Blu
 move_service_file "/tmp/prometheus.service" "/etc/systemd/system/prometheus.service"
 move_service_file "/tmp/node_exporter.service" "/etc/systemd/system/node_exporter.service"
 
-# Step 6: Enable and start the services only if they aren't already running
-print_message "Enabling and starting Prometheus and Node Exporter services..." "34"  # Blue text for info
-if ! systemctl is-active --quiet node_exporter.service; then
-    sudo systemctl enable node_exporter.service
+# Step 6: Unmask the services if they are masked and then enable/start them
+print_message "Unmasking and starting Prometheus and Node Exporter services..." "34"  # Blue text for info
+
+# Unmask and start Node Exporter if necessary
+if systemctl is-enabled --quiet node_exporter.service; then
+    sudo systemctl unmask node_exporter.service
     sudo systemctl start node_exporter.service
 else
     print_message "Node Exporter service is already running." "33"  # Yellow text for warning
 fi
 
-if ! systemctl is-active --quiet prometheus.service; then
-    sudo systemctl enable prometheus.service
+# Unmask and start Prometheus if necessary
+if systemctl is-enabled --quiet prometheus.service; then
+    sudo systemctl unmask prometheus.service
     sudo systemctl start prometheus.service
 else
     print_message "Prometheus service is already running." "33"  # Yellow text for warning
