@@ -72,7 +72,5 @@ The script provides an interactive menu with the following options:
 
 ## Author
 
-[CLAWE] 
+CLAWE
 📧 xoo9hr@gmail.com
----
-This README.md is designed to be professional, informative, and visually appealing, making it easy for others to understand and use your script.
