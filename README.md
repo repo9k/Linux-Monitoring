@@ -7,70 +7,31 @@
 
 This Bash script automates the setup of a monitoring stack using **Prometheus**, **Node Exporter**, and **Grafana**. It simplifies the process of downloading, configuring, and starting these tools on a Linux system.
 
----
+## 🚀 Features
+- **Download and Install Prometheus & Node Exporter**: Automatically downloads and installs the required tarballs.
+- **Move Service Files**: Ensures Prometheus and Node Exporter service files are placed in the correct directory for systemd.
+- **Enable & Start Services**: Automatically enables and starts Prometheus and Node Exporter services.
+- **Grafana Installation**: Installs Grafana if it is not already installed, and ensures the Grafana server is up and running.
+- **Cool and Clean Terminal Output**: With beautiful colored output, the installation process is fun and engaging.
 
-## Features
+## 📦 Requirements
+- A Linux-based system (Ubuntu/Debian).
+- **sudo** privileges.
+- **wget** (already available on most systems).
+- **tar** for extracting the downloaded tarballs.
 
-- **Automated Setup**: Downloads and configures Prometheus, Node Exporter, and Grafana.
-- **Interactive Menu**: Easy-to-use menu for step-by-step setup.
-- **Error Handling**: Skips steps if files or services already exist.
-- **Service Management**: Automatically starts and enables services.
+## 🛠️ Installation Instructions
 
-
-## Tools Included
-
-1. **Prometheus**: A powerful time-series database for monitoring metrics.
-2. **Node Exporter**: Collects system-level metrics (CPU, memory, disk, etc.).
-3. **Grafana**: A visualization tool for creating dashboards from Prometheus data.
-
-
-## Prerequisites
-
-- **Linux System**: Tested on Ubuntu/Debian-based systems.
-- **sudo Access**: Required for installing packages and moving files.
-- **Internet Connection**: Needed to download files.
-
-
-## How to Use
-
-### 1. Clone the Repository
+### 1. Download the secript
 
 ```bash
-git clone https://github.com/your-username/monitoring-setup.git
-cd monitoring-setup
+wget https://github.com/repo9k/Linux-Monitoring/blob/main/setup.sh
 ```
-### 2. Make the Script Executable
+### 2. Run the script:
 ```bash
-chmod +x setup_monitoring.sh
+sudo sh setup.sh
 ```
-
-### 3. Run the Script
-```bash
-./setup_monitoring.sh
-```
-
-### 4. Follow the Menu
-
-The script provides an interactive menu with the following options:
-
-| Option | Description                                                                 |
-|--------|-----------------------------------------------------------------------------|
-| 1      | Setup Monitoring (Download, Extract, and Move Files)                       |
-| 2      | Start Monitoring Services (Prometheus and Node Exporter)                    |
-| 3      | Install Grafana                                                             |
-| 4      | Check Service Status                                                        |
-| 5      | Exit                                                                        |
-
-
-## Screenshots
-
-### Interactive Menu
-![Menu](https://via.placeholder.com/600x300.png?text=Interactive+Menu)
-
-### Service Status
-![Status](https://via.placeholder.com/600x300.png?text=Service+Status)
-
-## Author
-
-CLAWE
-📧 xoo9hr@gmail.com
+### 📖 Credits:
+- Prometheus: https://prometheus.io/
+- Node Exporter: https://github.com/prometheus/node_exporter
+- Grafana: https://grafana.com/
