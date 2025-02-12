@@ -25,7 +25,7 @@ This Bash script automates the setup of a monitoring stack using **Prometheus**,
 ### 1. Download the secript
 
 ```bash
-wget https://github.com/repo9k/Linux-Monitoring/blob/main/setup.sh
+curl -O https://raw.githubusercontent.com/repo9k/Linux-Monitoring/main/setup.sh
 ```
 ### 2. Run the script:
 ```bash
