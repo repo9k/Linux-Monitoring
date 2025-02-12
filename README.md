@@ -61,20 +61,6 @@ The script provides an interactive menu with the following options:
 | 4      | Check Service Status                                                        |
 | 5      | Exit                                                                        |
 
-## Example Workflow
-
-1. Setup Monitoring (Option 1):
-- **Downloads Prometheus, Node Exporter, and Grafana files.
-- **Extracts and moves files to the correct directories.
-
-2. Start Monitoring Services (Option 2):
-- Starts and enables Prometheus and Node Exporter services.
-
-3. Install Grafana (Option 3):
-- Installs Grafana and starts the Grafana server.
-
-4. Check Service Status (Option 4):
-- Verifies that all services are running.
 
 ## Screenshots
 
