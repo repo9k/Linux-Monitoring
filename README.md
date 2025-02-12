@@ -1,4 +1,3 @@
----
 # Monitoring Setup Script
 
 ![Bash](https://img.shields.io/badge/Language-Bash-green)
@@ -42,7 +41,7 @@ This Bash script automates the setup of a monitoring stack using **Prometheus**,
 ```bash
 git clone https://github.com/your-username/monitoring-setup.git
 cd monitoring-setup
-
+```
 ### 2. Make the Script Executable
 chmod +x setup_monitoring.sh
 
