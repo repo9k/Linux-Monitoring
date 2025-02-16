@@ -64,16 +64,14 @@ move_files() {
         echo "node_exporter.service already exists. Skipping move."
     fi
 }
-
 # Function to enable and start services
 enable_start_services() {
     echo "Enabling and starting Prometheus and Node Exporter services..."
     systemctl enable node_exporter.service || { echo "Failed to enable node_exporter"; exit 1; }
     systemctl enable prometheus.service || { echo "Failed to enable prometheus"; exit 1; }
-    systemctl enable grafana-server.service || { echo "Failed to enable grafana"; exit 1; }
     systemctl start node_exporter.service || { echo "Failed to start node_exporter"; exit 1; }
     systemctl start prometheus.service || { echo "Failed to start prometheus"; exit 1; }
-    systemctl start grafana-server.service || { echo "Failed to start grafana"; exit 1; }
+
 }
 
 # Function to install dependencies
@@ -99,6 +97,7 @@ install_grafana() {
 start_grafana_service() {
     echo "Starting Grafana server..."
     service grafana-server start || { echo "Failed to start Grafana service"; exit 1; }
+    systemctl enable grafana-server.service || { echo "Failed to enable grafana"; exit 1; }
 }
 
 # Main script starts here
