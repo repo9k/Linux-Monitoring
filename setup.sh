@@ -1,5 +1,5 @@
 #!/bin/bash
-
+apt update
 # Function to download files with progress bar
 download_file() {
     local url=$1
