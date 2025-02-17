@@ -44,13 +44,9 @@ move_files() {
     else
         echo "/etc/prometheus already exists. Skipping move."
     fi
-
-    if [ ! -f "/etc/prometheus/prometheus.yml" ]; then
-        rm -r /etc/prometheus/prometheus.yml
-        mv prometheus.yml /etc/prometheus || { echo "Failed to move prometheus.yml"; exit 1; }
-    else
-        echo "/etc/prometheus/prometheus.yml already exists. Skipping move."
-    fi
+    
+    rm -r /etc/prometheus/prometheus.yml
+    mv prometheus.yml /etc/prometheus
 
     if [ ! -f "/etc/systemd/system/prometheus.service" ]; then
         mv prometheus.service /etc/systemd/system/prometheus.service || { echo "Failed to move prometheus.service"; exit 1; }
